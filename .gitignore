@@ -1,15 +1,9 @@
-# Environment variables and secrets
+# Environment variables
 .env
 .env.local
 .env.development
 .env.production
 .env.test
-config/secrets.json
-**/credentials/*
-**/*password*
-**/*secret*
-**/*apikey*
-**/*token*
 
 # Django
 *.log
@@ -66,21 +60,28 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# Node.js (if using any frontend tools)
+# Secrets and credentials
+**/credentials/*
+**/*password*
+**/*secret*
+**/*apikey*
+**/*token*
+config/secrets.json
+secrets.json
+
+# Node modules (if using any frontend tools)
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Temporary files
-*.tmp
-*.temp
-.cache/
-
 # Coverage reports
 htmlcov/
+.tox/
 .coverage
 .coverage.*
+.cache
+nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
@@ -88,4 +89,5 @@ coverage.xml
 
 # Backup files
 *.bak
-*.backup 
+*.backup
+*.tmp 
