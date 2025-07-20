@@ -9,9 +9,8 @@ cmds = [
 
 [phases.build]
 cmds = [
-    ". /opt/venv/bin/activate && python manage.py collectstatic --noinput",
-    ". /opt/venv/bin/activate && python manage.py migrate"
+    ". /opt/venv/bin/activate && python manage.py collectstatic --noinput"
 ]
 
 [start]
-cmd = ". /opt/venv/bin/activate && gunicorn myproject.wsgi:application --bind 0.0.0.0:$PORT" 
+cmd = ". /opt/venv/bin/activate && python manage.py migrate && gunicorn myproject.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120" 
