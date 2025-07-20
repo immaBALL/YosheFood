@@ -1,0 +1,364 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Details - YosheFood</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="https://img.icons8.com/ios-filled/50/e2b400/meal.png" alt="logo">
+            <span>YosheFood</span>
+        </div>
+        <nav>
+            <a href="{% url 'index' %}">Home</a>
+            <a href="#products">Menu</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </div>
+    
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="order-container">
+        <div class="order-header">
+            <a href="{% url 'index' %}" class="back-link">← Back</a>
+            <h1>Place Your Order</h1>
+        </div>
+        
+        <form method="POST" class="order-form">
+            {% csrf_token %}
+            
+            <h3>Customer Information</h3>
+            
+            <!-- Progress Indicator -->
+            <div class="form-progress">
+                <div class="progress-step active">
+                    <div class="progress-dot"></div>
+                    <span>Account</span>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-dot"></div>
+                    <span>Order</span>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-dot"></div>
+                    <span>Review</span>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-dot"></div>
+                    <span>Confirmation</span>
+                </div>
+            </div>
+            
+            <!-- Benefits Section -->
+            <div class="form-benefits">
+                <h4>Why provide your details?</h4>
+                <ul>
+                    <li>Faster checkout for future orders</li>
+                    <li>Order tracking and delivery updates</li>
+                    <li>Exclusive offers and discounts</li>
+                    <li>Personalized recommendations</li>
+                </ul>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="customer_name" class="required-field">Full Name</label>
+                    <input type="text" id="customer_name" name="customer_name" placeholder="Enter your full name" required>
+                    <div class="form-help-text">As it appears on your ID</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="customer_email" class="required-field">Email Address</label>
+                    <input type="email" id="customer_email" name="customer_email" placeholder="your.email@example.com" required>
+                    <div class="form-help-text">For order confirmations and updates</div>
+                </div>
+            </div>
+            
+            <div class="guest-option">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="guest_checkout" onchange="toggleGuestFields()">
+                    <span class="checkmark"></span>
+                    Continue as guest (no account required)
+                </label>
+            </div>
+            
+            <button type="submit" class="submit-btn">Continue to Order</button>
+        </form>
+    </div>
+
+    <script>
+        // Form validation and UX enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.order-form');
+            const inputs = form.querySelectorAll('input, textarea');
+            const submitBtn = document.querySelector('.submit-btn');
+            
+            // Real-time validation feedback
+            inputs.forEach(input => {
+                input.addEventListener('blur', function(e) {
+                    validateField(e);
+                    checkFormConditions();
+                });
+                input.addEventListener('input', function(e) {
+                    clearError(e);
+                    checkFormConditions();
+                });
+            });
+            
+            // Check form conditions and update button state
+            function checkFormConditions() {
+                const customerNameField = document.getElementById('customer_name');
+                const customerEmailField = document.getElementById('customer_email');
+                const guestCheckout = document.getElementById('guest_checkout').checked;
+                
+                const customerName = customerNameField.value.trim();
+                const customerEmail = customerEmailField.value.trim();
+                
+                // Check if fields pass validation
+                const nameValid = customerName && !customerNameField.classList.contains('error');
+                const emailValid = customerEmail && !customerEmailField.classList.contains('error') && 
+                                 (customerEmail === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail));
+                
+                // Enable button if both name and email are valid OR guest checkout is selected
+                if ((nameValid && emailValid) || guestCheckout) {
+                    submitBtn.classList.add('active');
+                    submitBtn.disabled = false;
+                } else {
+                    submitBtn.classList.remove('active');
+                    submitBtn.disabled = true;
+                }
+            }
+            
+            // Add event listeners for form condition checking
+            document.getElementById('customer_name').addEventListener('input', checkFormConditions);
+            document.getElementById('customer_email').addEventListener('input', checkFormConditions);
+            document.getElementById('guest_checkout').addEventListener('change', checkFormConditions);
+            
+            // Initial check
+            checkFormConditions();
+            
+            // Form submission with validation
+            form.addEventListener('submit', function(e) {
+                const guestCheckout = document.getElementById('guest_checkout').checked;
+                
+                // If guest checkout is selected, allow form submission without validation
+                if (guestCheckout) {
+                    // Show loading state
+                    submitBtn.textContent = 'Processing...';
+                    submitBtn.disabled = true;
+                    return; // Allow form to submit
+                }
+                
+                // Otherwise, validate the form
+                if (!validateForm()) {
+                    e.preventDefault();
+                    showFormError('Please fill in all required fields correctly.');
+                } else {
+                    // Show loading state
+                    submitBtn.textContent = 'Processing...';
+                    submitBtn.disabled = true;
+                }
+            });
+            
+            // Auto-save form data to localStorage
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    localStorage.setItem('yoshefood_form_' + input.name, input.value);
+                });
+                
+                // Restore saved data
+                const savedValue = localStorage.getItem('yoshefood_form_' + input.name);
+                if (savedValue) {
+                    input.value = savedValue;
+                }
+            });
+        });
+        
+        function validateField(e) {
+            const field = e.target;
+            const value = field.value.trim();
+            
+            // Remove existing error styling
+            field.classList.remove('error');
+            
+            // Check if required field is empty
+            if (field.hasAttribute('required') && !value) {
+                showFieldError(field, 'This field is required');
+                return false;
+            }
+            
+            // Email validation
+            if (field.type === 'email' && value) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(value)) {
+                    showFieldError(field, 'Please enter a valid email address');
+                    return false;
+                }
+            }
+            
+            // Phone validation
+            if (field.type === 'tel' && value) {
+                const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+                const cleanPhone = value.replace(/[\s\-\(\)]/g, '');
+                if (!phoneRegex.test(cleanPhone)) {
+                    showFieldError(field, 'Please enter a valid phone number');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        function showFieldError(field, message) {
+            field.classList.add('error');
+            
+            // Remove existing error message
+            const existingError = field.parentNode.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Add new error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            errorDiv.style.color = '#ff6b6b';
+            errorDiv.style.fontSize = '0.85rem';
+            errorDiv.style.marginTop = '5px';
+            field.parentNode.appendChild(errorDiv);
+        }
+        
+        function clearError(e) {
+            const field = e.target;
+            field.classList.remove('error');
+            const errorMessage = field.parentNode.querySelector('.error-message');
+            if (errorMessage) {
+                errorMessage.remove();
+            }
+        }
+        
+        function validateForm() {
+            const guestCheckout = document.getElementById('guest_checkout').checked;
+            
+            // If guest checkout is selected, skip validation
+            if (guestCheckout) {
+                return true;
+            }
+            
+            // Otherwise, validate required fields
+            const inputs = document.querySelectorAll('.order-form input[required], .order-form textarea[required]');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                if (!validateField({ target: input })) {
+                    isValid = false;
+                }
+            });
+            
+            return isValid;
+        }
+        
+        function showFormError(message) {
+            // Remove existing form error
+            const existingError = document.querySelector('.form-error');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Add form error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'form-error';
+            errorDiv.textContent = message;
+            errorDiv.style.background = '#ff6b6b';
+            errorDiv.style.color = 'white';
+            errorDiv.style.padding = '15px';
+            errorDiv.style.borderRadius = '8px';
+            errorDiv.style.marginBottom = '20px';
+            errorDiv.style.textAlign = 'center';
+            errorDiv.style.fontWeight = 'bold';
+            
+            const form = document.querySelector('.order-form');
+            form.insertBefore(errorDiv, form.firstChild);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        function toggleGuestFields() {
+            const guestCheckout = document.getElementById('guest_checkout');
+            const guestOption = document.querySelector('.guest-option');
+            const customerNameField = document.getElementById('customer_name');
+            const customerEmailField = document.getElementById('customer_email');
+            
+            if (guestCheckout.checked) {
+                // Clear the form fields
+                customerNameField.value = '';
+                customerEmailField.value = '';
+                
+                // Remove required attribute when guest checkout is selected
+                customerNameField.removeAttribute('required');
+                customerEmailField.removeAttribute('required');
+                
+                // Clear from localStorage
+                localStorage.removeItem('yoshefood_form_customer_name');
+                localStorage.removeItem('yoshefood_form_customer_email');
+                
+                // Update styling
+                guestOption.style.background = 'linear-gradient(135deg, #333, #2a2a2a)';
+                guestOption.style.borderColor = '#e2b400';
+                guestOption.style.transform = 'translateY(-2px)';
+                guestOption.style.boxShadow = '0 4px 15px rgba(226, 180, 0, 0.2)';
+                
+                // Disable fields when guest checkout is selected
+                customerNameField.disabled = true;
+                customerEmailField.disabled = true;
+                customerNameField.style.opacity = '0.5';
+                customerEmailField.style.opacity = '0.5';
+            } else {
+                // Restore styling
+                guestOption.style.background = 'linear-gradient(135deg, #444, #3a3a3a)';
+                guestOption.style.borderColor = '#555';
+                guestOption.style.transform = 'translateY(0)';
+                guestOption.style.boxShadow = 'none';
+                
+                // Re-enable fields and restore required attributes
+                customerNameField.disabled = false;
+                customerEmailField.disabled = false;
+                customerNameField.style.opacity = '1';
+                customerEmailField.style.opacity = '1';
+                customerNameField.setAttribute('required', 'required');
+                customerEmailField.setAttribute('required', 'required');
+            }
+            
+            // Check form conditions after toggling
+            checkFormConditions();
+        }
+        
+        // Clear form data when order is completed
+        function clearFormData() {
+            const inputs = document.querySelectorAll('.order-form input, .order-form textarea');
+            inputs.forEach(input => {
+                localStorage.removeItem('yoshefood_form_' + input.name);
+            });
+        }
+    </script>
+</body>
+</html>

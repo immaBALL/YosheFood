@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - YosheFood</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="https://img.icons8.com/ios-filled/50/e2b400/meal.png" alt="logo">
+            <span>YosheFood</span>
+        </div>
+        <nav>
+            <a href="{% url 'index' %}">Home</a>
+            <a href="#products">Menu</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </div>
+    
+    <div class="confirmation-container">
+        <div class="confirmation-header">
+            <div class="success-icon">✓</div>
+            <h1>Order Confirmed!</h1>
+            <p style="color: #ccc; font-size: 1.1rem;">Thank you for your order. We're preparing your delicious meal!</p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="form-progress">
+            <div class="progress-step completed">
+                <div class="progress-dot"></div>
+                <span>Account</span>
+            </div>
+            <div class="progress-step completed">
+                <div class="progress-dot"></div>
+                <span>Order</span>
+            </div>
+            <div class="progress-step completed">
+                <div class="progress-dot"></div>
+                <span>Review</span>
+            </div>
+            <div class="progress-step active">
+                <div class="progress-dot"></div>
+                <span>Confirmation</span>
+            </div>
+        </div>
+        
+        <div class="confirmation-message">
+            <strong>Order #{{ order.id }}</strong> has been successfully placed and is being processed.
+        </div>
+        
+        <div class="order-details">
+            <h3>Order Details</h3>
+            
+            <div class="order-info">
+                <div class="info-item">
+                    <label>Order Number</label>
+                    <div class="value">#{{ order.id }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Order Date</label>
+                    <div class="value">{{ order.order_date|date:"F j, Y" }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Order Time</label>
+                    <div class="value">{{ order.order_date|date:"g:i A" }}</div>
+                </div>
+            </div>
+            
+            {% if order.customer_name or order.customer_email %}
+            <div class="order-info">
+                {% if order.customer_name %}
+                <div class="info-item">
+                    <label>Customer Name</label>
+                    <div class="value">{{ order.customer_name }}</div>
+                </div>
+                {% endif %}
+                {% if order.customer_email %}
+                <div class="info-item">
+                    <label>Email Address</label>
+                    <div class="value">{{ order.customer_email }}</div>
+                </div>
+                {% endif %}
+                <div class="info-item">
+                    <label>Order Type</label>
+                    <div class="value">{% if order.is_guest_order %}Guest Order{% else %}Registered Order{% endif %}</div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="order-items">
+                <h4>Order Items</h4>
+                {% for item in order_items %}
+                <div class="item-card">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="item-image">
+                    <div class="item-details">
+                        <div class="item-name">{{ item.product.name }}</div>
+                        <div class="item-quantity">Quantity: {{ item.quantity }}</div>
+                        <div class="item-price">${{ item.price }} each</div>
+                    </div>
+                    <div class="item-total">
+                        <div class="item-price">${{ item.total_price }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="total-section">
+                Total Amount: ${{ total_amount }}
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="{% url 'index' %}" class="btn btn-primary">Return to Home</a>
+            <a href="{% url 'customer_details' %}" class="btn btn-secondary">Place Another Order</a>
+        </div>
+    </div>
+</body>
+</html>

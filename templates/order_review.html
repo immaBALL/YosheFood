@@ -1,0 +1,308 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Order - YosheFood</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <style>
+        .review-container {
+            max-width: 800px;
+            margin: 80px auto 0;
+            padding: 40px 20px;
+        }
+        
+        .review-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .review-header h1 {
+            color: #e2b400;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .review-header .review-icon {
+            font-size: 4rem;
+            color: #e2b400;
+            margin-bottom: 20px;
+        }
+        
+        .review-message {
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            border-left: 4px solid #e2b400;
+        }
+        
+        .order-summary {
+            background: #333;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .order-summary h3 {
+            color: #e2b400;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+        
+        .customer-info {
+            background: #444;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #e2b400;
+        }
+        
+        .customer-info h4 {
+            color: #e2b400;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        
+        .customer-info p {
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        
+        .customer-info .guest-note {
+            color: #888;
+            font-style: italic;
+            margin: 0;
+        }
+        
+        .order-items {
+            margin-bottom: 30px;
+        }
+        
+        .order-items h4 {
+            color: #e2b400;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .item-card {
+            background: #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .item-details {
+            flex: 1;
+        }
+        
+        .item-name {
+            color: #e2b400;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .item-quantity {
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+        
+        .item-price {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .item-total {
+            text-align: right;
+        }
+        
+        .total-section {
+            background: #e2b400;
+            color: #222;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.2s;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: #e2b400;
+            color: #222;
+        }
+        
+        .btn-primary:hover {
+            background: #c9a000;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #444;
+            color: #fff;
+            border: 2px solid #666;
+        }
+        
+        .btn-secondary:hover {
+            background: #555;
+            border-color: #777;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        
+        .btn-danger:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .item-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .review-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="https://img.icons8.com/ios-filled/50/e2b400/meal.png" alt="logo">
+            <span>YosheFood</span>
+        </div>
+        <nav>
+            <a href="{% url 'index' %}">Home</a>
+            <a href="#products">Menu</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </div>
+    
+    <div class="review-container">
+        <div class="review-header">
+            <div class="review-icon">📋</div>
+            <h1>Review Your Order</h1>
+            <p style="color: #ccc; font-size: 1.1rem;">Please review your order details before confirming</p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="form-progress">
+            <div class="progress-step completed">
+                <div class="progress-dot"></div>
+                <span>Account</span>
+            </div>
+            <div class="progress-step completed">
+                <div class="progress-dot"></div>
+                <span>Order</span>
+            </div>
+            <div class="progress-step active">
+                <div class="progress-dot"></div>
+                <span>Review</span>
+            </div>
+            <div class="progress-step">
+                <div class="progress-dot"></div>
+                <span>Confirmation</span>
+            </div>
+        </div>
+        
+        <div class="review-message">
+            <strong>Almost there!</strong> Please review your order details below and click "Confirm Order" to complete your purchase.
+        </div>
+        
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            
+            <div class="customer-info">
+                <h4>Customer Information</h4>
+                {% if customer_name %}
+                <p><strong>Name:</strong> {{ customer_name }}</p>
+                {% endif %}
+                {% if customer_email %}
+                <p><strong>Email:</strong> {{ customer_email }}</p>
+                {% endif %}
+                {% if guest_checkout %}
+                <p class="guest-note">Guest checkout</p>
+                {% endif %}
+            </div>
+            
+            <div class="order-items">
+                <h4>Order Items</h4>
+                {% for item in order_items %}
+                <div class="item-card">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="item-image">
+                    <div class="item-details">
+                        <div class="item-name">{{ item.product.name }}</div>
+                        <div class="item-quantity">Quantity: {{ item.quantity }}</div>
+                        <div class="item-price">${{ item.price }} each</div>
+                    </div>
+                    <div class="item-total">
+                        <div class="item-price">${{ item.total_price }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="total-section">
+                Total Amount: ${{ total_amount }}
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="confirm">
+                <button type="submit" class="btn btn-primary">Confirm Order</button>
+            </form>
+            <a href="{% url 'order' %}" class="btn btn-secondary">Edit Order</a>
+            <a href="{% url 'customer_details' %}" class="btn btn-danger">Cancel</a>
+        </div>
+    </div>
+</body>
+</html> 
